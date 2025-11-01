@@ -1,0 +1,181 @@
+// Proyecto: TechStore - Sistema NoSQL
+
+use('techstore_inventory');
+
+// Limpieza inicial
+db.productos.drop();
+db.proveedores.drop();
+
+// CREAR COLECCIONES CON VALIDACION
+
+// Crear colección "proveedores" con validación de esquema
+db.createCollection('proveedores', {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["nombre", "telefono", "email", "direccion"],
+      properties: {
+        nombre: { bsonType: "string", description: "Nombre del proveedor" },
+        telefono: { bsonType: "string", description: "Teléfono de contacto" },
+        email: {
+          bsonType: "string",
+          pattern: "^.+@.+\\..+$",
+          description: "Correo electrónico válido"
+        },
+        direccion: { bsonType: "string", description: "Dirección física" }
+      }
+    }
+  }
+});
+
+// Insertar un proveedor de prueba
+db.proveedores.insertOne({
+  nombre: "Tech Import S.A.",
+  telefono: "0998765432",
+  email: "ventas@techimport.ec",
+  direccion: "Av. Amazonas 321, Quito"
+});
+
+// Guardar el _id del proveedor
+var proveedor = db.proveedores.findOne({ nombre: "Tech Import S.A." });
+var idProveedor = proveedor._id;
+
+// Crear colección "productos" con validación de esquema
+db.createCollection('productos', {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["sku", "nombre", "precio_unitario", "stock", "especificaciones"],
+      properties: {
+        sku: {
+          bsonType: "string",
+          description: "Código único del producto (SKU)"
+        },
+        nombre: {
+          bsonType: "string",
+          description: "Nombre comercial del producto"
+        },
+        marca: {
+          bsonType: "string",
+          description: "Marca o fabricante"
+        },
+        precio_unitario: {
+          bsonType: ["double", "int"],
+          minimum: 0,
+          description: "Precio de venta unitario"
+        },
+        stock: {
+          bsonType: "int",
+          minimum: 0,
+          description: "Cantidad disponible en inventario"
+        },
+        especificaciones: {
+          bsonType: "object",
+          description: "Documento anidado con características flexibles",
+          properties: {
+            procesador: { bsonType: "string" },
+            ram: { bsonType: "string" },
+            almacenamiento: { bsonType: "string" },
+            pantalla: { bsonType: "string" },
+            color: { bsonType: "string" },
+            sistema_operativo: { bsonType: "string" }
+          },
+          additionalProperties: true
+        },
+        categoria: {
+          bsonType: "string",
+          description: "Categoría del producto (Smartphone, Laptop, etc.)"
+        },
+        proveedor_id: {
+          bsonType: "objectId",
+          description: "Referencia al proveedor del producto"
+        },
+        fecha_creacion: {
+          bsonType: "date",
+          description: "Fecha de creación del registro"
+        }
+      }
+    }
+  }
+});
+
+// Crear índice único para SKU
+db.productos.createIndex({ sku: 1 }, { unique: true });
+
+// INSERTAR PRODUCTOS DE PRUEBAS
+
+db.productos.insertMany([
+  {
+    sku: "SKU001",
+    nombre: "Samsung Galaxy A35",
+    marca: "Samsung",
+    precio_unitario: 499.99,
+    stock: 30,
+    categoria: "Smartphones",
+    especificaciones: {
+      procesador: "Exynos 1380",
+      ram: "8GB",
+      almacenamiento: "256GB",
+      pantalla: "6.6'' AMOLED 120Hz",
+      sistema_operativo: "Android 14"
+    },
+    proveedor_id: idProveedor,
+    fecha_creacion: ISODate("2025-10-28T00:00:00Z")
+  },
+  {
+    sku: "SKU002",
+    nombre: "Laptop Acer Aspire 5",
+    marca: "Acer",
+    precio_unitario: 850.00,
+    stock: 12,
+    categoria: "Laptops",
+    especificaciones: {
+      procesador: "Intel Core i7-1255U",
+      ram: "16GB",
+      almacenamiento: "512GB SSD",
+      pantalla: "15.6'' Full HD",
+      sistema_operativo: "Windows 11"
+    },
+    proveedor_id: idProveedor,
+    fecha_creacion: ISODate("2025-10-28T00:00:00Z")
+  },
+  {
+    sku: "SKU003",
+    nombre: "LG UltraGear 27GN950",
+    marca: "LG",
+    precio_unitario: 420.00,
+    stock: 20,
+    categoria: "Monitores",
+    especificaciones: {
+      pantalla: "27'' 4K UHD 144Hz",
+      color: "Negro",
+      tipo_panel: "Nano IPS",
+      tiempo_respuesta: "1ms"
+    },
+    proveedor_id: idProveedor,
+    fecha_creacion: ISODate("2025-10-28T00:00:00Z")
+  }
+]);
+
+// CONSULTAS DE EJEMPLO
+
+// Mostrar todos los productos
+db.productos.find().pretty();
+
+// Mostrar solo los productos tipo "Laptops"
+db.productos.find(
+  { categoria: "Laptops" },
+  { nombre: 1, precio_unitario: 1, stock: 1, _id: 0 }
+);
+
+// Mostrar productos con más de 10 unidades y precio < 1000
+db.productos.find(
+  { stock: { $gt: 10 }, precio_unitario: { $lt: 1000 } },
+  { nombre: 1, precio_unitario: 1, stock: 1 }
+);
+
+// Mostrar nombre, precio y stock de los "Smartphones"
+db.productos.find(
+  { categoria: "Smartphones" },
+  { nombre: 1, precio_unitario: 1, stock: 1, _id: 0 }
+);
