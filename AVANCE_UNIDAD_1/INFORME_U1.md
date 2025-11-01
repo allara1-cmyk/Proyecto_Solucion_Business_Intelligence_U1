@@ -1,9 +1,7 @@
-# INFORME_U1.md  
 ## Proyecto: TechStore – Modelo Dual de Bases de Datos (SQL + NoSQL)  
 **Autor:** Lara Chicaiza Anderson Lenin  
-**Asignatura:** Inteligencia Artificial – 6to ITIN  
-**Unidad:** U1 – Modelado de Sistemas Operacionales (OLTP)
-z
+**Asignatura:** Modelado Avanzado de Base de Datos – 6to ITIN  
+
 ---
 
 # 1. Justificación del Modelo Dual (SQL para ventas, NoSQL para productos)
