@@ -112,7 +112,7 @@ db.productos.createIndex({ sku: 1 }, { unique: true });
 
 **Datos no Controlados en la BDD** 
 
-Existen registros donde el campo `email` se encuentra vacío, nulo o con un formato incorrecto (por ejemplo, sin “@” o sin dominio).  
+Existen registros donde el campo `email` se encuentra vacío, nulo o con un formato incorrecto.  
 Esto ocurre por la falta de validaciones en los formularios de ingreso o en los procesos ETL de carga de datos.
 
    **Ejemplo de registros inválidos:**
@@ -137,8 +137,8 @@ Se registran ventas con **cantidades iguales o menores a cero** o con **fechas p
 
 - **Validación de datos en la capa de aplicación (backend/UI):**  
   Implementar controles en los formularios o interfaces de registro que verifiquen que:
-  - El campo `email` no esté vacío y cumpla el formato válido (por ejemplo, `usuario@dominio.com`).  
-  - No se permita registrar ventas con `cantidad ≤ 0` ni con `fecha_venta` posterior a la actual.
+  - El campo `email` no esté vacío y cumpla el formato válido.  
+  - No se permita registrar ventas con cantidad menor o igual que 0 ni con `fecha_venta` posterior a la actual.
 
 - **Controles en los procesos ETL:**  
   Durante la carga de datos hacia el sistema o el Data Mart, aplicar reglas de validación que:
